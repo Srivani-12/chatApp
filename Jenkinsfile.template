@@ -8,11 +8,17 @@ triggers {
       pollSCM '*/2 * * * *'
 }
   stages{
+    stage('Checkout'){
+      steps{
+        echo "Checking out source code.."
+        checkout scm
+    }
+}
     stage('Build'){
       steps{
         echo "Building.."
         sh '''
-        echo "doing build stuff.."
+        mvn clean install
         '''
       }
     }
@@ -20,18 +26,34 @@ triggers {
       steps{
         echo "Testing..."
         sh '''
-        echo "doing test stuff.."
+        mvn test
         '''
       }
     }
+    stage('Package'){
+      steps{
+        echo "Packaging the Spring boot app.."
+        sh '''
+        mvn package
+        '''
+}
+}
     stage('Delivery'){
       steps{
-        echo 'Deliver...'
+        echo "Deliver / Deployment stage ..."
         sh '''
-        echo "doing delivery stuff.."
+        echo "Jar file is located at target/*.jar"
         '''
       }
     }
   }
+post{
+success{
+echo "Pipeline completed successfully!"
+}
+failure{
+echo "Pipeline failed."
+}
+}
 }
         
